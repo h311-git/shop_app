@@ -11,39 +11,39 @@ import '../providers/product_provider.dart';
 enum MenuItems { Favorite, All }
 
 class ProductPage extends StatefulWidget {
+  static const routeName = '/product_page';
   @override
   _ProductPageState createState() => _ProductPageState();
 }
 
 class _ProductPageState extends State<ProductPage> {
   var _isFavorite = false;
-  bool _isLoading = true;
   @override
-  void initState() {
-    Provider.of<Products>(context, listen: false).getProducts().then((value) {
-      setState(() {
-        _isLoading = false;
-      });
-    }).catchError((_) {
-      showDialog<Null>(
-          context: context,
-          builder: (ctx) => AlertDialog(
-                title: Text("Error"),
-                content: Text("Something went wrong!"),
-                actions: [
-                  FlatButton(
-                    onPressed: () => {Navigator.of(ctx).pop()},
-                    child: Text("okey"),
-                  )
-                ],
-              )).then((_) {
-        setState(() {
-          _isLoading = false;
-        });
-      });
-    });
-    super.initState();
-  }
+  // void initState() {
+  //   Provider.of<Products>(context, listen: false).getProducts().then((value) {
+  //     setState(() {
+  //       _isLoading = false;
+  //     });
+  //   }).catchError((_) {
+  //     showDialog<Null>(
+  //         context: context,
+  //         builder: (ctx) => AlertDialog(
+  //               title: Text("Error"),
+  //               content: Text("Something went wrong!"),
+  //               actions: [
+  //                 FlatButton(
+  //                   onPressed: () => {Navigator.of(ctx).pop()},
+  //                   child: Text("okey"),
+  //                 )
+  //               ],
+  //             )).then((_) {
+  //       setState(() {
+  //         _isLoading = false;
+  //       });
+  //     });
+  //   });
+  //   super.initState();
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -90,9 +90,7 @@ class _ProductPageState extends State<ProductPage> {
           ),
         ],
       ),
-      body: _isLoading
-          ? Center(child: CircularProgressIndicator())
-          : ProductsGrid(_isFavorite),
+      body: ProductsGrid(_isFavorite),
     );
   }
 }

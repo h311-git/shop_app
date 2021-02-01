@@ -21,7 +21,7 @@ class Products with ChangeNotifier {
   }
 
   Future<void> addProduct(Product newProduct) {
-    const url = 'http://192.168.1.101:3000/products';
+    const url = 'http://10.0.2.2:3000/products';
     return http.post(url,
         body: json.encode({
           'title': newProduct.title,
@@ -42,7 +42,7 @@ class Products with ChangeNotifier {
   }
 
   Future<void> getProducts() async {
-    const url = 'http://192.168.1.101:300/products';
+    const url = 'http://10.0.2.2:3000/products';
     final response = await http.get(url);
     print(json.decode(response.body));
   }

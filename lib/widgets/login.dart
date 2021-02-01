@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import "package:provider/provider.dart";
+import '../providers/auth.dart';
+import '../pages/products_page.dart';
 
 class Login extends StatefulWidget {
   const Login({
@@ -21,7 +24,7 @@ class _LoginState extends State<Login> {
   final _passController = TextEditingController();
   bool _isloading = false;
   Map<String, String> _userCred = {
-    'username': '',
+    'email': '',
     'password': '',
   };
   Method _loginMehtod = Method.Login;
@@ -32,12 +35,28 @@ class _LoginState extends State<Login> {
     });
   }
 
-  void _saveForm() {
+  Future<void> _saveForm() async {
     if (_key.currentState.validate()) {
       _key.currentState.save();
+    } else {
+      return;
     }
     setState(() {
       _isloading = true;
+    });
+    if (_loginMehtod == Method.Singnup) {
+      await Provider.of<Auth>(context, listen: false).signUp(
+        _userCred['email'],
+        _userCred['password'],
+      );
+    } else {
+      await Provider.of<Auth>(context, listen: false).login(
+        _userCred['email'],
+        _userCred['password'],
+      );
+    }
+    setState(() {
+      _isloading = false;
     });
   }
 
@@ -76,13 +95,13 @@ class _LoginState extends State<Login> {
                     TextFormField(
                       textInputAction: TextInputAction.next,
                       decoration: InputDecoration(
-                        labelText: "UserName",
+                        labelText: "email",
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(20),
                         ),
                       ),
-                      onSaved: (username) {
-                        _userCred['username'] = username;
+                      onSaved: (email) {
+                        _userCred['email'] = email;
                       },
                     ),
                     SizedBox(
@@ -157,7 +176,9 @@ class _LoginState extends State<Login> {
         TextButton(
           onPressed: _triggerMethod,
           child: Text(
-            _loginMehtod == Method.Login ? "Signup instead" : "Login instead",
+            _loginMehtod == Method.Login
+                ? "Dont have any account yet?Sign Up"
+                : "Login instead",
             style: TextStyle(
               fontWeight: FontWeight.bold,
             ),
