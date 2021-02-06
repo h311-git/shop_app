@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import "package:provider/provider.dart";
 import '../providers/auth.dart';
-import '../pages/products_page.dart';
 
 class Login extends StatefulWidget {
   const Login({
@@ -19,7 +18,7 @@ enum Method {
   Singnup,
 }
 
-class _LoginState extends State<Login> {
+class _LoginState extends State<Login> with SingleTickerProviderStateMixin {
   final _key = GlobalKey<FormState>();
   final _passController = TextEditingController();
   bool _isloading = false;
@@ -27,12 +26,20 @@ class _LoginState extends State<Login> {
     'email': '',
     'password': '',
   };
-  Method _loginMehtod = Method.Login;
+  Method _loginMethod = Method.Login;
+
   void _triggerMethod() {
-    setState(() {
-      _loginMehtod =
-          _loginMehtod == Method.Login ? Method.Singnup : Method.Login;
-    });
+    if (_loginMethod == Method.Login) {
+      setState(() {
+        _loginMethod = Method.Singnup;
+      });
+      _animationController.forward();
+    } else {
+      setState(() {
+        _loginMethod = Method.Login;
+      });
+      _animationController.reverse();
+    }
   }
 
   Future<void> _saveForm() async {
@@ -44,7 +51,7 @@ class _LoginState extends State<Login> {
     setState(() {
       _isloading = true;
     });
-    if (_loginMehtod == Method.Singnup) {
+    if (_loginMethod == Method.Singnup) {
       await Provider.of<Auth>(context, listen: false).signUp(
         _userCred['email'],
         _userCred['password'],
@@ -60,9 +67,29 @@ class _LoginState extends State<Login> {
     });
   }
 
+  AnimationController _animationController;
+  Animation<double> _opacityAnimation;
+  Animation<Offset> _slideAnimation;
+  @override
+  void initState() {
+    _animationController = AnimationController(
+      vsync: this,
+      duration: Duration(milliseconds: 300),
+    );
+    _slideAnimation = Tween<Offset>(
+      begin: Offset(0.0, -0.5),
+      end: Offset(0.0, 0.0),
+    ).animate(
+        CurvedAnimation(parent: _animationController, curve: Curves.easeIn));
+    _opacityAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+        CurvedAnimation(parent: _animationController, curve: Curves.easeIn));
+    super.initState();
+  }
+
   @override
   void dispose() {
     _passController.dispose();
+    _animationController.dispose();
     super.dispose();
   }
 
@@ -70,9 +97,11 @@ class _LoginState extends State<Login> {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Container(
+        AnimatedContainer(
+          duration: Duration(milliseconds: 300),
+          curve: Curves.easeIn,
           width: 300,
-          height: _loginMehtod == Method.Singnup
+          height: _loginMethod == Method.Singnup
               ? widget.deviceSize * 0.62
               : widget.deviceSize * 0.48,
           margin: EdgeInsets.only(
@@ -95,7 +124,7 @@ class _LoginState extends State<Login> {
                     TextFormField(
                       textInputAction: TextInputAction.next,
                       decoration: InputDecoration(
-                        labelText: "email",
+                        labelText: "Email",
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(20),
                         ),
@@ -114,7 +143,7 @@ class _LoginState extends State<Login> {
                       controller: _passController,
                       keyboardType: TextInputType.text,
                       obscureText: true,
-                      textInputAction: _loginMehtod == Method.Singnup
+                      textInputAction: _loginMethod == Method.Singnup
                           ? TextInputAction.next
                           : TextInputAction.done,
                       decoration: InputDecoration(
@@ -124,27 +153,39 @@ class _LoginState extends State<Login> {
                         labelText: "Password",
                       ),
                     ),
-                    if (_loginMehtod == Method.Singnup)
                       SizedBox(
                         height: 20,
                       ),
-                    if (_loginMehtod == Method.Singnup)
-                      TextFormField(
-                        keyboardType: TextInputType.text,
-                        obscureText: true,
-                        decoration: InputDecoration(
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          labelText: "Confirm Password",
-                        ),
-                        validator: (value) {
-                          if (value != _passController.text) {
-                            return "passwords do not match!";
-                          }
-                          return null;
-                        },
+                    AnimatedContainer(
+                      duration: Duration(milliseconds: 300),
+                      constraints: BoxConstraints(
+                        minHeight: _loginMethod == Method.Login ? 0 : 60,
+                        maxHeight: _loginMethod == Method.Login ? 0 : 120,
                       ),
+                      curve: Curves.easeIn,
+                      child: FadeTransition(
+                        opacity: _opacityAnimation,
+                        child: SlideTransition(
+                          position: _slideAnimation,
+                            child: TextFormField(
+                            keyboardType: TextInputType.text,
+                            obscureText: true,
+                            decoration: InputDecoration(
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              labelText: "Confirm Password",
+                            ),
+                            validator: (value) {
+                              if (value != _passController.text) {
+                                return "passwords do not match!";
+                              }
+                              return null;
+                            },
+                          ),
+                        ),
+                      ),
+                    ),
                     SizedBox(
                       height: 20,
                     ),
@@ -159,7 +200,7 @@ class _LoginState extends State<Login> {
                               child: ElevatedButton(
                                 onPressed: _saveForm,
                                 child: Text(
-                                  _loginMehtod == Method.Login
+                                  _loginMethod == Method.Login
                                       ? "Login"
                                       : "SignUp",
                                   style: TextStyle(fontSize: 18),
@@ -176,14 +217,14 @@ class _LoginState extends State<Login> {
         TextButton(
           onPressed: _triggerMethod,
           child: Text(
-            _loginMehtod == Method.Login
+            _loginMethod == Method.Login
                 ? "Dont have any account yet?Sign Up"
                 : "Login instead",
             style: TextStyle(
               fontWeight: FontWeight.bold,
             ),
           ),
-        )
+        ),
       ],
     );
   }
