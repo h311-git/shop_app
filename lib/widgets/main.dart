@@ -10,6 +10,7 @@ import '../pages/product_edit_page.dart';
 import '../pages/add_product_page.dart';
 import '../pages/login_page.dart';
 import '../providers/auth.dart';
+import '../helpers/custom_route.dart';
 
 void main() {
   runApp(MyApp());
@@ -28,9 +29,11 @@ class MyApp extends StatelessWidget {
           builder: (ctx, auth, _) => MaterialApp(
             title: 'Flutter Demo',
             theme: ThemeData(
-              primarySwatch: Colors.pink,
-              accentColor: Colors.deepOrange,
-            ),
+                primarySwatch: Colors.pink,
+                accentColor: Colors.deepOrange,
+                pageTransitionsTheme: PageTransitionsTheme(builders: {
+                  TargetPlatform.android: CustomPageTransitionBuilder(),
+                })),
             routes: {
               '/': (ctx) => auth.isauth()
                   ? ProductPage()

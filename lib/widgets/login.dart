@@ -51,6 +51,7 @@ class _LoginState extends State<Login> with SingleTickerProviderStateMixin {
     setState(() {
       _isloading = true;
     });
+
     if (_loginMethod == Method.Singnup) {
       await Provider.of<Auth>(context, listen: false).signUp(
         _userCred['email'],
@@ -153,13 +154,13 @@ class _LoginState extends State<Login> with SingleTickerProviderStateMixin {
                         labelText: "Password",
                       ),
                     ),
-                      SizedBox(
-                        height: 20,
-                      ),
+                    SizedBox(
+                      height: 20,
+                    ),
                     AnimatedContainer(
                       duration: Duration(milliseconds: 300),
                       constraints: BoxConstraints(
-                        minHeight: _loginMethod == Method.Login ? 0 : 60,
+                        minHeight: _loginMethod == Method.Login ? 0 : 80,
                         maxHeight: _loginMethod == Method.Login ? 0 : 120,
                       ),
                       curve: Curves.easeIn,
@@ -167,7 +168,8 @@ class _LoginState extends State<Login> with SingleTickerProviderStateMixin {
                         opacity: _opacityAnimation,
                         child: SlideTransition(
                           position: _slideAnimation,
-                            child: TextFormField(
+                          child: TextFormField(
+                            enabled: _loginMethod == Method.Singnup,
                             keyboardType: TextInputType.text,
                             obscureText: true,
                             decoration: InputDecoration(
@@ -176,12 +178,14 @@ class _LoginState extends State<Login> with SingleTickerProviderStateMixin {
                               ),
                               labelText: "Confirm Password",
                             ),
-                            validator: (value) {
-                              if (value != _passController.text) {
-                                return "passwords do not match!";
-                              }
-                              return null;
-                            },
+                            validator: _loginMethod == Method.Singnup
+                                ? (value) {
+                                    if (value != _passController.text) {
+                                      return "passwords do not match!";
+                                    }
+                                    return null;
+                                  }
+                                : null,
                           ),
                         ),
                       ),
